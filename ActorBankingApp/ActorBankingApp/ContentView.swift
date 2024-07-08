@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@MainActor
 class BankAccountViewModel: ObservableObject {
     
     private var bankAccount: BankAccount
@@ -17,16 +18,14 @@ class BankAccountViewModel: ObservableObject {
         bankAccount = BankAccount(balance: balance)
     }
     
-    func withdraw(_ amount: Double) {
-        bankAccount.withdraw(amount)
-        DispatchQueue.main.async {
-            self.currentBalance = self.bankAccount.getBalance()
-            self.transactions = self.bankAccount.transactions
-        }
+    func withdraw(_ amount: Double) async {
+        await bankAccount.withdraw(amount)
+        self.currentBalance = await self.bankAccount.getBalance()
+        self.transactions = await self.bankAccount.transactions
     }
 }
 
-class BankAccount {
+actor BankAccount {
     private(set) var balance: Double
     private(set) var transactions: [String] = []
     
@@ -63,12 +62,11 @@ struct ContentView: View {
     var body: some View {
         VStack {
             Button("Withdraw") {
-                queue.async {
-                    bankAccountVM.withdraw(200)
+                Task.detached {
+                    await bankAccountVM.withdraw(500)
                 }
-                
-                queue.async {
-                    bankAccountVM.withdraw(500)
+                Task.detached {
+                    await bankAccountVM.withdraw(300)
                 }
             }
             Text("\(bankAccountVM.currentBalance ?? 0.0)")
