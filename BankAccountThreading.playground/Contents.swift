@@ -23,6 +23,7 @@ class BankAccount {
 }
 let bankAccount = BankAccount(balance: 500)
 
+//MARK: SerialQueue
 let serialQueue = DispatchQueue(label: "SerialQueue")
 
 //MARK: ConcurrentQueue
